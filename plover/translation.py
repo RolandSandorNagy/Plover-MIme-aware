@@ -163,12 +163,13 @@ class Translator(object):
 
     IME_CMD_HIDE = "CMD::HIDE"
 
-    def __init__(self, max_pos):
+    def __init__(self, steno_engine):
         self._undo_length = 0
         self._dictionary = None
-        self.set_dictionary(StenoDictionaryCollection(max_pos))
+        self.set_dictionary(StenoDictionaryCollection(steno_engine.max_poss))
         self._listeners = set()
         self._state = _State()
+        self.steno_engine = steno_engine
 
     def translate(self, stroke):
         """Process a single stroke."""
@@ -294,7 +295,8 @@ class Translator(object):
         if add_to_history:
             self._state.translations.extend(do)
 
-        self.find_possible_continues(do, undo)
+        if(self.steno_engine.is_running):
+            self.find_possible_continues(do, undo)
 
     def find_possible_continues(self, do, undo):
         if(len(do) < 1):

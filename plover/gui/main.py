@@ -267,7 +267,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self._quit)
         self.Bind(wx.EVT_MOVE, self.on_move)
         self.reconnect_button.Bind(wx.EVT_BUTTON, lambda e: self._reconnect())
-        self.ime_connection_button.Bind(wx.EVT_BUTTON, lambda e: self.startIMEProcess())
+        self.ime_connection_button.Bind(wx.EVT_BUTTON, lambda e: self.toggleIMEProcess())
 
         try:
             with open(config.target_file, 'rb') as f:
@@ -303,7 +303,7 @@ class MainFrame(wx.Frame):
         self.steno_engine.translator.create_common_words_dict(config.get_ime_words_csv_file())
 
         if(self.config.get_start_ime_on_startup()):
-            self.startIMEProcess()
+            self.toggleIMEProcess()
             
         try:
             app.init_engine(self.steno_engine, self.config)
@@ -314,11 +314,11 @@ class MainFrame(wx.Frame):
    
     def sendToIME(self, msg):
         if(msg == self.IME_CMD_START):
-            self.startIMEProcess()
+            self.toggleIMEProcess()
             return
         self.ime_connection.setMsg(msg)
         
-    def startIMEProcess(self):
+    def toggleIMEProcess(self):
         # if not self.steno_engine.is_running:
             # return False
         if(self.ime_connection.connected):

@@ -177,9 +177,8 @@ class StenoDictionaryCollection(object):
         return {k: poss[k] for k in poss.keys()[:self.max_possibilities]}
 
     def getPopularElements(self, poss):
-
-
         # Indexing
+        # print 'itt vagyok'
         poss_indexed = ()
         for key in poss:
             new_row = self.common_words_dist_has_it(poss, key)
@@ -200,12 +199,22 @@ class StenoDictionaryCollection(object):
             for i in range(0, len(poss_indexed)):
                 if(poss_indexed[i][2] == 0):
                     poss_ret[poss_indexed[i][0]] = poss_indexed[i][1]
+                    # print poss_indexed[i][0], ' - ', poss_indexed[i][1]
                     more_needed -= 1
                     if(more_needed == 0):
+                        more_left = len(poss) - self.max_possibilities
+                        poss_ret[((u'ime--lop',),)] = str(more_left)
+                        # print more_left, ' more possibilities available.'
                         return poss_ret            
+            more_left = len(poss) - self.max_possibilities, ' more possibilities available.'
+            # poss_ret[(('ime::lop'),)] = more_left
+            # print more_left
             return poss_ret
         for i in range(0, len(poss_sorted)):
             poss_ret[poss_sorted[i][0]] = poss_sorted[i][1]
+        more_left = len(poss) - self.max_possibilities, ' more possibilities available.'
+        # poss_ret['ime::lop'] = more_left
+        # print more_left
         return {k: poss_ret[k] for k in poss_ret.keys()[:self.max_possibilities]}
 
     def getKey(self, item):
