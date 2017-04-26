@@ -1,0 +1,7 @@
+This list shows how much time each plugin has taken to respond to each event:
+
+on_activated:
+    Default.pane: 0.000s total
+
+on_selection_modified:
+
