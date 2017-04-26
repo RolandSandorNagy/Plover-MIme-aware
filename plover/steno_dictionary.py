@@ -124,15 +124,6 @@ class StenoDictionaryCollection(object):
                         return None
                 return value
 
-    def create_common_words_dict(self, fname):
-        self.common_words_dict = ()
-        try:
-            reader = csv.DictReader(open(fname))
-            for row in reader:
-                self.common_words_dict += (row,)
-        except Exception:
-            return
-
     def findPossibleContinues(self, do, filters=()):
         key = do[0].rtfcre
         key_len = len(key)
@@ -158,6 +149,15 @@ class StenoDictionaryCollection(object):
                     possibilities[(entry,)] = d.get(entry_key) 
         return self.shrinkPossibilities(possibilities)
 
+    def create_common_words_dict(self, fname):
+        self.common_words_dict = {}
+        try:
+            reader = csv.DictReader(open(fname))
+            for row in reader:
+                self.common_words_dict[row['Word']] = row['Rank']
+        except Exception:
+            return
+
     def isPossibleContinue(self, key, entry):
         if(len(key) >= len(entry)):
             return False
@@ -166,26 +166,55 @@ class StenoDictionaryCollection(object):
                 return False
         return True
 
-    def shrinkPossibilities(self, pos):
-        if(len(pos) <= self.max_possibilities):
-            return pos
+    def shrinkPossibilities(self, poss):
+        if(len(poss) <= self.max_possibilities):
+            return poss
         if(len(self.common_words_dict) == 0):
-            return self.getFirstFewElements(pos)
-        return self.getPopularElements(pos)
+            return self.getFirstFewElements(poss)
+        return self.getPopularElements(poss)
 
-    def getFirstFewElements(self, pos):
-        return {k: pos[k] for k in pos.keys()[:self.max_possibilities]}
+    def getFirstFewElements(self, poss):
+        return {k: poss[k] for k in poss.keys()[:self.max_possibilities]}
 
-    def getPopularElements(self, pos):
-        # TODO: select the best max_possibilities 
-        #       number of elements from pos 
-        #       accoring to common_words_dict 
-        return {k: pos[k] for k in pos.keys()[:self.max_possibilities]}
+    def getPopularElements(self, poss):
 
 
+        # Indexing
+        poss_indexed = ()
+        for key in poss:
+            new_row = self.common_words_dist_has_it(poss, key)
+            poss_indexed += (new_row,)
+        
+        # Sorting
+        poss_to_be_sorted = ()
+        for i in range(0, len(poss_indexed)):
+            if(poss_indexed[i][2] != 0):
+                poss_to_be_sorted += (poss_indexed[i],)
+        poss_sorted = sorted(poss_to_be_sorted, key=self.getKey)
+        poss_ret = {}
+        if(len(poss_sorted) <= self.max_possibilities):            
+            for i in range(0, len(poss_sorted)):
+                poss_ret[poss_sorted[i][0]] = poss_sorted[i][1]
 
-    def take(self, n, iterable):
-        return list(islice(iterable, n))
+            more_needed = self.max_possibilities - len(poss_sorted)
+            for i in range(0, len(poss_indexed)):
+                if(poss_indexed[i][2] == 0):
+                    poss_ret[poss_indexed[i][0]] = poss_indexed[i][1]
+                    more_needed -= 1
+                    if(more_needed == 0):
+                        return poss_ret            
+            return poss_ret
+        for i in range(0, len(poss_sorted)):
+            poss_ret[poss_sorted[i][0]] = poss_sorted[i][1]
+        return {k: poss_ret[k] for k in poss_ret.keys()[:self.max_possibilities]}
+
+    def getKey(self, item):
+        return item[2]
+
+    def common_words_dist_has_it(self, poss, key):
+        if(self.common_words_dict.has_key(key)):
+            return (key, poss[key], int(row['Rank']))
+        return (key, poss[key], 0)
 
     def set_max_possibilities(self, max_poss):
         self.max_possibilities = max_poss
