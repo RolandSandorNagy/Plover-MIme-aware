@@ -772,7 +772,7 @@ class ImeConfig(wx.Panel):
         self.number_of_suggestions = number_of_suggestions_buffer
 
 
-
+        '''
         choice_grid = wx.FlexGridSizer(2, 3)
         choice_grid.AddGrowableCol(1)
 
@@ -787,6 +787,8 @@ class ImeConfig(wx.Panel):
         self.choice.SetStringSelection(self.mapSuggestBy_its(self.config.get_ime_suggest_by()))
         choice_grid.AddF(self.choice, sizer_flags.Expand())
         self.Bind(wx.EVT_CHOICE, self._update, self.choice)
+        '''
+
 
         csv_loc_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -852,7 +854,7 @@ class ImeConfig(wx.Panel):
 
         border = wx.BoxSizer(wx.VERTICAL)
         border.AddF(top_grid, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
-        border.AddF(choice_grid, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
+        # border.AddF(choice_grid, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
         border.AddF(csv_loc_sizer, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
         border.AddF(exe_loc_sizer, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
         border.AddF(bottom_grid, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
@@ -864,6 +866,7 @@ class ImeConfig(wx.Panel):
         # TODO
         print "update"
 
+
     def save(self):
         """Write all parameters to the config."""
         self.config.set_start_ime_on_startup(
@@ -872,15 +875,18 @@ class ImeConfig(wx.Panel):
             self.popup_timeout.GetValue())
         self.config.set_ime_number_of_suggestions(
             self.number_of_suggestions.GetValue())
+        '''
         self.config.set_ime_suggest_by(
             self.mapSuggestBy_sti(
                 self.choice.GetStringSelection()))
+        '''
         self.config.set_ime_words_csv_file(
             self.csv_file_browser.GetValue())
         self.config.set_ime_exe_file(
             self.exe_file_browser.GetValue())
         self.config.set_ime_host(self.host.GetValue())
         self.config.set_ime_port(self.port.GetValue())
+        self._update()
 
     def mapSuggestBy_sti(self, str):
         if(str == "random"):

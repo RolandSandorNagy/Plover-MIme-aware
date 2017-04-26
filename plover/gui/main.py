@@ -280,7 +280,7 @@ class MainFrame(wx.Frame):
         rect = wx.Rect(config.get_main_frame_x(), config.get_main_frame_y(), *self.GetSize())
         self.SetRect(AdjustRectToScreen(rect))
 
-        self.steno_engine = app.StenoEngine()
+        self.steno_engine = app.StenoEngine(config.get_ime_number_of_suggestions())
         self.steno_engine.add_callback(
             lambda s: wx.CallAfter(self._update_status, s))
         self.steno_engine.set_output(

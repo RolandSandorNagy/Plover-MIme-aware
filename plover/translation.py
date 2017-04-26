@@ -163,10 +163,10 @@ class Translator(object):
 
     IME_CMD_HIDE = "CMD::HIDE"
 
-    def __init__(self):
+    def __init__(self, max_pos):
         self._undo_length = 0
         self._dictionary = None
-        self.set_dictionary(StenoDictionaryCollection())
+        self.set_dictionary(StenoDictionaryCollection(max_pos))
         self._listeners = set()
         self._state = _State()
 
@@ -294,6 +294,9 @@ class Translator(object):
         if add_to_history:
             self._state.translations.extend(do)
 
+        self.find_possible_continues(do, undo)
+
+    def find_possible_continues(self, do, undo):
         if(len(do) < 1):
             possible_continues = {}
             self.ime_connection.setMsg(self.IME_CMD_HIDE)

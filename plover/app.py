@@ -122,7 +122,7 @@ class StenoEngine(object):
 
     """
 
-    def __init__(self, thread_hook=same_thread_hook):
+    def __init__(self, max_pos, thread_hook=same_thread_hook):
         """Creates and configures a single steno pipeline."""
         self.subscribers = []
         self.stroke_listeners = []
@@ -134,7 +134,7 @@ class StenoEngine(object):
         self.suggestions = None
         self.thread_hook = thread_hook
 
-        self.translator = translation.Translator()
+        self.translator = translation.Translator(max_pos)
         self.formatter = formatting.Formatter()
         self.translator.add_listener(log.translation)
         self.translator.add_listener(self.formatter.format)

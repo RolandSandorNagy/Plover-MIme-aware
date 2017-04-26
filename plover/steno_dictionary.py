@@ -92,12 +92,12 @@ class StenoDictionary(collections.MutableMapping):
 
 class StenoDictionaryCollection(object):
 
-    def __init__(self):
+    def __init__(self, max_pos):
         self.dicts = []
         self.filters = []
         self.longest_key = 0
         self.longest_key_callbacks = set()
-        self.max_possibilities = 10
+        self.max_possibilities = max_pos
 
     def set_dicts(self, dicts):
         for d in self.dicts:
@@ -170,13 +170,22 @@ class StenoDictionaryCollection(object):
         if(len(pos) <= self.max_possibilities):
             return pos
         if(len(self.common_words_dict) == 0):
-            # TODO: only return the first max_possibilities 
-            #       number of elements from pos
-            return pos
+            return self.getFirstFewElements(pos)
+        return self.getPopularElements(pos)
+
+    def getFirstFewElements(self, pos):
+        return {k: pos[k] for k in pos.keys()[:self.max_possibilities]}
+
+    def getPopularElements(self, pos):
         # TODO: select the best max_possibilities 
         #       number of elements from pos 
         #       accoring to common_words_dict 
-        return pos
+        return {k: pos[k] for k in pos.keys()[:self.max_possibilities]}
+
+
+
+    def take(self, n, iterable):
+        return list(islice(iterable, n))
 
     def set_max_possibilities(self, max_poss):
         self.max_possibilities = max_poss
