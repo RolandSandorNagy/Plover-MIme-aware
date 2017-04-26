@@ -798,7 +798,7 @@ class ImeConfig(wx.Panel):
         self.csv_file_browser = filebrowse.FileBrowseButton(
             self,
             labelText=IME_WORDS_LOC_LABEL,
-            fileMask='*' + conf.EXE_EXTENSION,
+            fileMask='*' + conf.CSV_EXTENSION,
             fileMode=wx.SAVE,
             dialogTitle=IME_CSV_FILE_DIALOG_TITLE,
             initialValue=ime_csv_file,
@@ -815,7 +815,7 @@ class ImeConfig(wx.Panel):
         self.exe_file_browser = filebrowse.FileBrowseButton(
             self,
             labelText=IME_LOC_LABEL,
-            fileMask='*' + conf.CSV_EXTENSION,
+            fileMask='*' + conf.EXE_EXTENSION,
             fileMode=wx.SAVE,
             dialogTitle=IME_EXE_FILE_DIALOG_TITLE,
             initialValue=ime_exe_file,
