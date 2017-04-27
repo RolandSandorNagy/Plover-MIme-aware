@@ -161,8 +161,6 @@ class Translator(object):
 
     """
 
-    IME_CMD_HIDE = "CMD::HIDE"
-
     def __init__(self, steno_engine):
         self._undo_length = 0
         self._dictionary = None
@@ -295,30 +293,8 @@ class Translator(object):
         if add_to_history:
             self._state.translations.extend(do)
 
-        if(self.steno_engine.is_running):
+        if(self.steno_engine.is_running and self.ime_connection.isActive):
             self.find_possible_continues(do, undo)
-
-    def find_possible_continues(self, do, undo):
-        if(len(do) < 1):
-            possible_continues = {}
-            self.ime_connection.setMsg(self.IME_CMD_HIDE)
-            if(len(self._state.translations) > 0):
-                before = [self._state.translations[len(self._state.translations) - 1]]
-                possible_continues = self.getPossibleContinues(before)        
-        else:
-            possible_continues = self.getPossibleContinues(do)
-        if(    (len(do) >= 1 and not do[0].rtfcre == ('*',)) 
-            or (len(do) < 1 and not undo[0].rtfcre == ('*',))):
-            self.ime_connection.setSuggestions(possible_continues)
-
-    def create_common_words_dict(self, fname):
-        self._dictionary.create_common_words_dict(fname)
-
-    def add_ime_connection(self, con):
-        self.ime_connection = con
-
-    def getPossibleContinues(self, do):
-        return self._dictionary.findPossibleContinues(do)
 
     def _find_translation(self, stroke, mapping):
         t = self._find_translation_helper(stroke)
@@ -418,6 +394,27 @@ class Translator(object):
                 return main_mapping + ' ' + suffix_mapping
 
         return None
+
+    def find_possible_continues(self, do, undo):
+        if(len(do) < 1):
+            possible_continues = {(('none',),): 'none'}
+            if(len(self._state.translations) > 0):
+                before = [self._state.translations[len(self._state.translations) - 1]]
+                possible_continues = self.getPossibleContinues(before)       
+        else:
+            possible_continues = self.getPossibleContinues(do)
+        if(    (len(do) >= 1 and not do[0].rtfcre == ('*',)) 
+            or (len(do) < 1 and not undo[0].rtfcre == ('*',))):
+            self.ime_connection.setSuggestions(possible_continues)
+
+    def create_common_words_dict(self, fname):
+        self._dictionary.create_common_words_dict(fname)
+
+    def add_ime_connection(self, con):
+        self.ime_connection = con
+
+    def getPossibleContinues(self, do):
+        return self._dictionary.findPossibleContinues(do)
 
 
 class _State(object):
