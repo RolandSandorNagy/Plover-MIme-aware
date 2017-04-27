@@ -280,7 +280,7 @@ class MainFrame(wx.Frame):
         rect = wx.Rect(config.get_main_frame_x(), config.get_main_frame_y(), *self.GetSize())
         self.SetRect(AdjustRectToScreen(rect))
 
-        self.steno_engine = app.StenoEngine(config.get_ime_number_of_suggestions())
+        self.steno_engine = app.StenoEngine(self)
         self.steno_engine.add_callback(
             lambda s: wx.CallAfter(self._update_status, s))
         self.steno_engine.set_output(
@@ -310,31 +310,6 @@ class MainFrame(wx.Frame):
         except Exception:
             log.error('engine initialization failed', exc_info=True)
             self._show_config_dialog()
-
-   
-    def sendToIME(self, msg):
-        if(msg == self.IME_CMD_START):
-            self.toggleIMEProcess()
-            return
-        self.ime_connection.setMsg(msg)
-        
-    def toggleIMEProcess(self):
-        # if not self.steno_engine.is_running:
-            # return False
-        if(self.ime_connection.connected):
-            self.sendToIME(self.IME_CMD_STOP)
-        else:
-            self.p = subprocess.Popen([self.config.get_ime_exe_file()])
-
-    def updateImeStatus(self, status):
-        if(status == self.IME_IS_CONNECTED):
-            self.ime_connection_ctrl.SetBitmap(self.connected_bitmap)
-            self.ime_connection_button.SetBitmap(self.disconnect_bitmap)
-        elif(status == self.IME_IS_PAUSED):
-            self.ime_connection_ctrl.SetBitmap(self.paused_bitmap)
-        elif(status == self.IME_IS_DISCONNECTED):
-            self.ime_connection_ctrl.SetBitmap(self.disconnected_bitmap)
-            self.ime_connection_button.SetBitmap(self.connect_bitmap)
 
     def _reconnect(self):
         try:
@@ -366,15 +341,6 @@ class MainFrame(wx.Frame):
         elif command == self.COMMAND_STARTIME:
             wx.CallAfter( self.sendToIME, self.IME_CMD_START)
             return True
-        elif command == self.COMMAND_SHOWIME:
-            wx.CallAfter(self.sendToIME, self.IME_CMD_SHOW)
-            return True
-        elif command == self.COMMAND_HIDEIME:
-            wx.CallAfter(self.sendToIME, self.IME_CMD_HIDE)
-            return True
-        elif command == self.COMMAND_SAVEIME:
-            wx.CallAfter(self.sendToIME, self.IME_CMD_SAVE)
-            return True
 
         if not self.steno_engine.is_running:
             return False
@@ -399,6 +365,15 @@ class MainFrame(wx.Frame):
         elif command == self.COMMAND_LOOKUP:
             wx.CallAfter(plover.gui.lookup.Show, 
                          self, self.steno_engine, self.config)
+            return True
+        elif command == self.COMMAND_SHOWIME:
+            wx.CallAfter(self.sendToIME, self.IME_CMD_SHOW)
+            return True
+        elif command == self.COMMAND_HIDEIME:
+            wx.CallAfter(self.sendToIME, self.IME_CMD_HIDE)
+            return True
+        elif command == self.COMMAND_SAVEIME:
+            wx.CallAfter(self.sendToIME, self.IME_CMD_SAVE)
             return True
             
         return False
@@ -477,6 +452,31 @@ class MainFrame(wx.Frame):
         self.config.set_main_frame_x(pos[0])
         self.config.set_main_frame_y(pos[1])
         event.Skip()
+
+    def sendToIME(self, msg):
+        if(msg == self.IME_CMD_START):
+            self.toggleIMEProcess()
+            return
+        self.ime_connection.setMsg(msg)
+
+    def toggleIMEProcess(self):
+        if(self.ime_connection.connected):
+            self.sendToIME(self.IME_CMD_STOP)
+        else:
+            self.p = subprocess.Popen([self.config.get_ime_exe_file()])
+
+    def updateImeStatus(self, status):
+        if(status == self.IME_IS_CONNECTED):
+            self.ime_connection_ctrl.SetBitmap(self.connected_bitmap)
+            self.ime_connection_button.SetBitmap(self.disconnect_bitmap)
+        elif(status == self.IME_IS_PAUSED):
+            self.ime_connection_ctrl.SetBitmap(self.paused_bitmap)
+        elif(status == self.IME_IS_DISCONNECTED):
+            self.ime_connection_ctrl.SetBitmap(self.disconnected_bitmap)
+            self.ime_connection_button.SetBitmap(self.connect_bitmap)
+
+    def get_max_poss(self):
+        return self.config.get_ime_number_of_suggestions()
 
 
 class Output(object):

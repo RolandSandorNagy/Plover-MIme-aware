@@ -126,7 +126,7 @@ class ConfigurationDialog(wx.Dialog):
         self.display_config = DisplayConfig(self.config, notebook, self.engine)
         self.output_config = OutputConfig(self.config, notebook)
 
-        self.ime_config = ImeConfig(self.config, notebook)
+        self.ime_config = ImeConfig(self.config, notebook, engine)
 
         # Adding each tab
         notebook.AddPage(self.machine_config, MACHINE_CONFIG_TAB_NAME)
@@ -718,7 +718,7 @@ class OutputConfig(wx.Panel):
 class ImeConfig(wx.Panel):
     """Display MIME configuration graphical user interface."""
 
-    def __init__(self, config, parent):
+    def __init__(self, config, parent, engine):
         """Create a configuration component based on the given Config.
 
         Arguments:
@@ -727,7 +727,10 @@ class ImeConfig(wx.Panel):
 
         parent -- This component's parent component.
 
+        engine -- Steno_Engine object that has MainFrame object reference.
+
         """
+        self.engine = engine
         wx.Panel.__init__(self, parent)
         self.config = config
         gap = COMPONENT_SPACE * 3
@@ -888,6 +891,7 @@ class ImeConfig(wx.Panel):
         self.config.set_ime_port(self.port.GetValue())
         self._update()
 
+    '''
     def mapSuggestBy_sti(self, str):
         if(str == "random"):
             return 1
@@ -903,3 +907,4 @@ class ImeConfig(wx.Panel):
             return "alphabetical (asc)"
         elif(i == 3):
             return "alphabetical (desc)"
+    '''

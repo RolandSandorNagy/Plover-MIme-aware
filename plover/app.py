@@ -122,7 +122,7 @@ class StenoEngine(object):
 
     """
 
-    def __init__(self, max_poss, thread_hook=same_thread_hook):
+    def __init__(self, frame, thread_hook=same_thread_hook):
         """Creates and configures a single steno pipeline."""
         self.subscribers = []
         self.stroke_listeners = []
@@ -134,7 +134,6 @@ class StenoEngine(object):
         self.suggestions = None
         self.thread_hook = thread_hook
 
-        self.max_poss = max_poss
         self.translator = translation.Translator(self)
         self.formatter = formatting.Formatter()
         self.translator.add_listener(log.translation)
@@ -144,6 +143,8 @@ class StenoEngine(object):
         self.command_only_output = SimpleNamespace()
         self.running_state = self.translator.get_state()
         self.set_is_running(False)
+
+        self.frame = frame
 
     def set_machine(self, machine_class,
                     machine_options=None,
@@ -239,7 +240,7 @@ class StenoEngine(object):
 
         """
         self.subscribers.append(callback)
-        
+
     def set_log_file_name(self, filename):
         """Set the file name for log output."""
         log.set_stroke_filename(filename)
@@ -266,7 +267,7 @@ class StenoEngine(object):
 
     def add_stroke_listener(self, listener):
         self.stroke_listeners.append(listener)
-        
+
     def remove_stroke_listener(self, listener):
         self.stroke_listeners.remove(listener)
 
@@ -286,4 +287,6 @@ class StenoEngine(object):
     def _machine_state_callback(self, s):
         self.thread_hook(self._notify_listeners, s)
 
+    def get_max_poss(self):
+        return self.frame.get_max_poss()
 

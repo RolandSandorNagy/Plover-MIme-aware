@@ -164,7 +164,7 @@ class Translator(object):
     def __init__(self, steno_engine):
         self._undo_length = 0
         self._dictionary = None
-        self.set_dictionary(StenoDictionaryCollection(steno_engine.max_poss))
+        self.set_dictionary(StenoDictionaryCollection(steno_engine))
         self._listeners = set()
         self._state = _State()
         self.steno_engine = steno_engine
@@ -181,13 +181,13 @@ class Translator(object):
             self._dictionary.remove_longest_key_listener(callback)
         self._dictionary = d
         d.add_longest_key_listener(callback)
-        
+
     def get_dictionary(self):
         return self._dictionary
 
     def add_listener(self, callback):
         """Add a listener for translation outputs.
-        
+
         Arguments:
 
         callback -- A function that takes: a list of translations to undo, a

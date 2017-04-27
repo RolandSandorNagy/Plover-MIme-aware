@@ -92,12 +92,12 @@ class StenoDictionary(collections.MutableMapping):
 
 class StenoDictionaryCollection(object):
 
-    def __init__(self, max_pos):
+    def __init__(self, engine):
         self.dicts = []
         self.filters = []
         self.longest_key = 0
         self.longest_key_callbacks = set()
-        self.max_possibilities = max_pos
+        self.engine = engine
 
     def set_dicts(self, dicts):
         for d in self.dicts:
@@ -201,13 +201,13 @@ class StenoDictionaryCollection(object):
         curr_key = u""
         for i in range(0, len(key)):
             if(not i == 0 and not i == len(key)):
-                curr_key += "/"    
+                curr_key += "/"
             curr_key += key[i]
         tr = u"none"
         if(do[0].english):
             tr = do[0].english
         # possibilities[(currentKey,)] = curr_key + u":" + tr + u":"
-        for d in self.dicts:    
+        for d in self.dicts:
             if key_len > d.longest_key:
                 continue
             for entry in d:
@@ -215,8 +215,8 @@ class StenoDictionaryCollection(object):
                     entry_key = ()
                     for i in range(0,len(entry)):
                         entry_key += (str(entry[i]),)
-                    possibilities[(entry,)] = d.get(entry_key) 
-        
+                    possibilities[(entry,)] = d.get(entry_key)
+
         possibilities = self.shrinkPossibilities(possibilities)
         possibilities[(currentKey,)] = curr_key + u":" + tr + u":"
         # return self.shrinkPossibilities(possibilities)
@@ -240,14 +240,14 @@ class StenoDictionaryCollection(object):
         return True
 
     def shrinkPossibilities(self, poss):
-        if(len(poss) <= self.max_possibilities):
+        if(len(poss) <= self.engine.get_max_poss()):
             return poss
         if(len(self.common_words_dict) == 0):
             return self.getFirstFewElements(poss)
         return self.getPopularElements(poss)
 
     def getFirstFewElements(self, poss):
-        return {k: poss[k] for k in poss.keys()[:self.max_possibilities]}
+        return {k: poss[k] for k in poss.keys()[:self.engine.get_max_poss()]}
 
     def getPopularElements(self, poss):
         # Indexing
@@ -255,7 +255,7 @@ class StenoDictionaryCollection(object):
         for key in poss:
             new_row = self.common_words_dist_has_it(poss, key)
             poss_indexed += (new_row,)
-        
+
         # Sorting
         poss_to_be_sorted = ()
         for i in range(0, len(poss_indexed)):
@@ -263,36 +263,33 @@ class StenoDictionaryCollection(object):
                 poss_to_be_sorted += (poss_indexed[i],)
         poss_sorted = sorted(poss_to_be_sorted, key=self.getKey)
         poss_ret = {}
-        if(len(poss_sorted) <= self.max_possibilities):            
+        if(len(poss_sorted) <= self.engine.get_max_poss()):
             for i in range(0, len(poss_sorted)):
                 poss_ret[poss_sorted[i][0]] = poss_sorted[i][1]
 
-            more_needed = self.max_possibilities - len(poss_sorted)
+            more_needed = self.engine.get_max_poss() - len(poss_sorted)
             for i in range(0, len(poss_indexed)):
                 if(poss_indexed[i][2] == 0):
                     poss_ret[poss_indexed[i][0]] = poss_indexed[i][1]
                     more_needed -= 1
                     if(more_needed == 0):
-                        more_left = len(poss) - self.max_possibilities
+                        more_left = len(poss) - self.engine.get_max_poss()
                         poss_ret[((u'ime--lop',),)] = str(more_left)
-                        return poss_ret            
-            more_left = len(poss) - self.max_possibilities
+                        return poss_ret
+            more_left = len(poss) - self.engine.get_max_poss()
             poss_ret[((u'ime--lop',),)] = str(more_left)
             return poss_ret
         for i in range(0, len(poss_sorted)):
             poss_ret[poss_sorted[i][0]] = poss_sorted[i][1]
-        more_left = len(poss) - self.max_possibilities
-        poss_ret = {k: poss_ret[k] for k in poss_ret.keys()[:self.max_possibilities]}
+        more_left = len(poss) - self.engine.get_max_poss()
+        poss_ret = {k: poss_ret[k] for k in poss_ret.keys()[:self.engine.get_max_poss()]}
         poss_ret[((u'ime--lop',),)] = str(more_left)
         return poss_ret
-
-    def getKey(self, item):
-        return item[2]
 
     def common_words_dist_has_it(self, poss, key):
         if(self.common_words_dict.has_key(poss[key])):
             return (key, poss[key], int(self.common_words_dict[poss[key]]))
         return (key, poss[key], 0)
 
-    def set_max_possibilities(self, max_poss):
-        self.max_possibilities = max_poss
+    def getKey(self, item):
+        return item[2]
