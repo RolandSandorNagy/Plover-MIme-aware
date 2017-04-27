@@ -396,15 +396,22 @@ class Translator(object):
         return None
 
     def find_possible_continues(self, do, undo):
+        # check if current outline ends
         if(len(do) < 1):
+            # prepare for there is no outline
             possible_continues = {(('none',),): 'none'}
+            # only look for possible continues if previous outline exist
             if(len(self._state.translations) > 0):
+                # search for possible continues based on previous outline
                 before = [self._state.translations[len(self._state.translations) - 1]]
-                possible_continues = self.getPossibleContinues(before)       
+                possible_continues = self.getPossibleContinues(before)
         else:
+            # search for possible continues based on current outline
             possible_continues = self.getPossibleContinues(do)
-        if(    (len(do) >= 1 and not do[0].rtfcre == ('*',)) 
-            or (len(do) < 1 and not undo[0].rtfcre == ('*',))):
+        # if there is possible continues ('suggestions') and current or previous
+        # (depends in the case) outline is not '*', than get ime_connection to send it
+        if((len(do) >= 1 and not do[0].rtfcre == ('*',)) or
+           (len(do) < 1 and not undo[0].rtfcre == ('*',))):
             self.ime_connection.setSuggestions(possible_continues)
 
     def create_common_words_dict(self, fname):

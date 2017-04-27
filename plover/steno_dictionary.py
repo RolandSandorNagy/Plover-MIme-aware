@@ -206,7 +206,6 @@ class StenoDictionaryCollection(object):
         tr = u"none"
         if(do[0].english):
             tr = do[0].english
-        # possibilities[(currentKey,)] = curr_key + u":" + tr + u":"
         for d in self.dicts:
             if key_len > d.longest_key:
                 continue
@@ -219,7 +218,6 @@ class StenoDictionaryCollection(object):
 
         possibilities = self.shrinkPossibilities(possibilities)
         possibilities[(currentKey,)] = curr_key + u":" + tr + u":"
-        # return self.shrinkPossibilities(possibilities)
         return possibilities
 
     def create_common_words_dict(self, fname):
