@@ -295,8 +295,10 @@ class Translator(object):
             self._state.translations.extend(do)
 
         if(self.steno_engine.is_running and self.ime_connection.isActive):
-            self.get_best_suggestions()
-            self.find_possible_continues(do, undo)
+            suggestions = self.get_best_suggestions()
+            print len(suggestions)
+            print suggestions
+            self.find_possible_continues(do, undo, suggestions)
 
     def get_best_suggestions(self):
             suggestion_list = []
@@ -308,9 +310,7 @@ class Translator(object):
             if not suggestion_list and split_words:
                 suggestion_list = [Suggestion(split_words[-1], [])]
 
-            if suggestion_list:
-                print len(suggestion_list)
-                print suggestion_list
+            return suggestion_list
 
     def _find_translation(self, stroke, mapping):
         t = self._find_translation_helper(stroke)
@@ -411,7 +411,7 @@ class Translator(object):
 
         return None
 
-    def find_possible_continues(self, do, undo):
+    def find_possible_continues(self, do, undo, suggestions):
         # check if current outline ends
         if(len(do) < 1):
             # prepare for there is no outline
@@ -424,11 +424,14 @@ class Translator(object):
         else:
             # search for possible continues based on current outline
             possible_continues = self.getPossibleContinues(do)
-        # if there is possible continues ('suggestions') and current or previous
+        # append suggestions to possible contiues
+        # TODO...
+
+        # if there is possible continues and current or previous
         # (depends in the case) outline is not '*', than get ime_connection to send it
         if((len(do) >= 1 and not do[0].rtfcre == ('*',)) or
            (len(do) < 1 and not undo[0].rtfcre == ('*',))):
-            self.ime_connection.setSuggestions(possible_continues)
+            self.ime_connection.setPossContAndSuggs(possible_continues)
 
     def create_common_words_dict(self, fname):
         self._dictionary.create_common_words_dict(fname)

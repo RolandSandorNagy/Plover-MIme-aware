@@ -104,7 +104,7 @@ class ImeConnection(threading.Thread):
             self.sendMessage(self.frame.IME_CMD_STOP);
         self.running = False
 
-    def setSuggestions(self, suggs):
+    def setPossContAndSuggs(self, suggs):
         if(not self.connected or not self.isActive):
             return
         self.suggestions = suggs
