@@ -61,13 +61,15 @@ IME_CONFIG_TAB_NAME = "MIme"
 START_IME_TEXT = "Open MIme on startup"
 SUGGEST_BY_LABEL = "Suggest by:"
 IME_WORDS_LOC_LABEL = "Common words csv file:"
-IME_LOC_LABEL = "MIme location:"
+IME_LOC_LABEL = "MIme.exe location:"
 IME_CSV_FILE_DIALOG_TITLE = "Select path to common words"
 IME_EXE_FILE_DIALOG_TITLE = "Select path to ime"
 IME_POPUP_HIDE_TIMEOUT = "Popup hide timeout:"
 IME_NUMBER_OF_SUGGESTIONS = "Number of suggestions:"
 IME_CON_HOST_NAME = "Host name:"
 IME_CON_PORT_NUMBER = "Port number:"
+POPUP_TIMEOUT_TOOLTIP_TEXT = "The 0 value sets no hide timeout."
+SECONDS_LABEL = "second(s)"
 
 UI_BORDER = 4
 COMPONENT_SPACE = 3
@@ -745,7 +747,9 @@ class ImeConfig(wx.Panel):
                   pos=(0, 0),
                   flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
 
-        top_grid.Add(wx.StaticText(self, label=IME_POPUP_HIDE_TIMEOUT),
+        popup_hide_timrout_label = wx.StaticText(self, label=IME_POPUP_HIDE_TIMEOUT)
+        popup_hide_timrout_label.SetToolTip(wx.ToolTip(POPUP_TIMEOUT_TOOLTIP_TEXT))
+        top_grid.Add(popup_hide_timrout_label,
                   pos=(1, 0),
                   flag=wx.ALIGN_CENTER_VERTICAL)
 
@@ -753,9 +757,16 @@ class ImeConfig(wx.Panel):
         popup_hide_timeout_buffer.SetRange(conf.MINIMUM_IME_POPUP_HIDE_TIMEPUT,
                                  conf.MAXIMUM_IME_POPUP_HIDE_TIMEPUT)
         popup_hide_timeout_buffer.SetValue(self.config.get_ime_popup_timeout())
+        popup_hide_timeout_buffer.SetToolTip(wx.ToolTip(POPUP_TIMEOUT_TOOLTIP_TEXT))
         top_grid.Add(popup_hide_timeout_buffer,
                   pos=(1, 1),
                   flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+
+        seconds_label = wx.StaticText(self, label=SECONDS_LABEL)
+        seconds_label.SetToolTip(wx.ToolTip(POPUP_TIMEOUT_TOOLTIP_TEXT))
+        top_grid.Add(seconds_label,
+                  pos=(1, 2),
+                  flag=wx.ALIGN_CENTER_VERTICAL)
 
         self.popup_timeout = popup_hide_timeout_buffer
 
