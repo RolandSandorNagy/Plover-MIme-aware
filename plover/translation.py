@@ -26,6 +26,7 @@ from plover.steno_dictionary import StenoDictionaryCollection
 from plover import system
 
 
+PAT = re.compile(r'[-\'"\w]+|[^\w\s]')
 _ESCAPE_RX = re.compile('(\\\\[nrt]|[\n\r\t])')
 _ESCAPE_REPLACEMENTS = {
     '\n': r'\n',
@@ -294,7 +295,22 @@ class Translator(object):
             self._state.translations.extend(do)
 
         if(self.steno_engine.is_running and self.ime_connection.isActive):
+            self.get_best_suggestions()
             self.find_possible_continues(do, undo)
+
+    def get_best_suggestions(self):
+            suggestion_list = []
+            split_words = PAT.findall(self.words)
+            for phrase in SuggestionsDisplayDialog.tails(split_words):
+                phrase = u' '.join(phrase)
+                suggestion_list.extend(self.steno_engine.get_suggestions(phrase))
+
+            if not suggestion_list and split_words:
+                suggestion_list = [Suggestion(split_words[-1], [])]
+
+            if suggestion_list:
+                print len(suggestion_list)
+                print suggestion_list
 
     def _find_translation(self, stroke, mapping):
         t = self._find_translation_helper(stroke)
