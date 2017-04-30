@@ -110,17 +110,17 @@ class ImeConnection(threading.Thread):
         self.suggestions = suggs
         self.hasSuggestions = True
 
-    def sendSuggestions(self, suggs):
+    def sendSuggestions(self, poss_and_suggs):
         if(not self.connected):
             return
         suggs_str = u""
-        for key in suggs:
+        for key in poss_and_suggs:
             key_str = u""
             for i in range(0, len(key[0])):
                 if(not i == 0 and not i == len(key[0])):
                     key_str += "/"    
                 key_str += key[0][i]
-            key_str += u":" + suggs[key] + u";"
+            key_str += u":" + poss_and_suggs[key] + u";"
             suggs_str += key_str
             if(suggs_str == u""):
                 suggs_str = u"none"

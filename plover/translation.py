@@ -295,9 +295,8 @@ class Translator(object):
             self._state.translations.extend(do)
 
         if(self.steno_engine.is_running and self.ime_connection.isActive):
-            suggestions = self.get_best_suggestions()
-            print len(suggestions)
-            print suggestions
+            # suggestions = self.get_best_suggestions()
+            suggestions = ()
             self.find_possible_continues(do, undo, suggestions)
 
     def get_best_suggestions(self):

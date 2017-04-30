@@ -141,15 +141,12 @@ class SuggestionsDisplayDialog(wx.Dialog):
         dc = wx.ScreenDC()
         dc.SetFont(self.stroke_style.GetFont())
 
-        # print len(suggestion_list)
         for suggestion in suggestion_list:
-            # print suggestion
             self.listbox.SetDefaultStyle(self.word_style)
             self.listbox.WriteText(
                 shorten_unicode(escape_translation(suggestion.text)) + u'\n'
             )
-            # print shorten_unicode(escape_translation(suggestion.text)) + u'\n'
-
+ 
             if not suggestion.steno_list:
                 self.listbox.SetDefaultStyle(self.no_suggestion_style)
                 self.listbox.WriteText(self.no_suggestion_indent)
@@ -172,7 +169,6 @@ class SuggestionsDisplayDialog(wx.Dialog):
                     self.listbox.WriteText(shorten_unicode(text))
                     suggs += (shorten_unicode(text),)
                 self.listbox.WriteText(u'\n')
-            # print suggs
 
         length = self.listbox.GetInsertionPoint()
         assert length
@@ -205,9 +201,6 @@ class SuggestionsDisplayDialog(wx.Dialog):
         for phrase in SuggestionsDisplayDialog.tails(split_words):
             phrase = u' '.join(phrase)
             suggestion_list.extend(self.engine.get_suggestions(phrase))
-
-        print len(suggestion_list)        
-        print suggestion_list        
 
         if not suggestion_list and split_words:
             suggestion_list = [Suggestion(split_words[-1], [])]
