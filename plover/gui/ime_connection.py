@@ -124,7 +124,7 @@ class ImeConnection(threading.Thread):
             suggs_str += key_str
             if(suggs_str == u""):
                 suggs_str = u"none"
-        try:                
+        try:                 
             self.sock.sendto(suggs_str.encode('utf-8'), (self.host, self.port))
             self.emptySuggestionTray()
             return True

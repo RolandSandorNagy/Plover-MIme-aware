@@ -24,6 +24,8 @@ import csv
 from plover.steno import Stroke
 from plover.steno_dictionary import StenoDictionaryCollection
 from plover import system
+import plover.formatting as formatting
+from plover.suggestions import Suggestion
 
 
 PAT = re.compile(r'[-\'"\w]+|[^\w\s]')
@@ -161,6 +163,8 @@ class Translator(object):
     output to every function that has registered via the add_callback method.
 
     """
+    start_capitalized = False
+    start_attached = False
 
     def __init__(self, steno_engine):
         self._undo_length = 0
@@ -169,6 +173,8 @@ class Translator(object):
         self._listeners = set()
         self._state = _State()
         self.steno_engine = steno_engine
+        self.spaces_after = False
+        self.words = u''
 
     def translate(self, stroke):
         """Process a single stroke."""
@@ -291,25 +297,13 @@ class Translator(object):
                 undo.extend(t.replaced)
         del self._state.translations[len(self._state.translations) - len(undo):]
         self._output(undo, do, self._state.last())
-        if add_to_history:
-            self._state.translations.extend(do)
 
+        suggestions = self.get_best_suggestions(do, undo, self._state.last())
         if(self.steno_engine.is_running and self.ime_connection.isActive):
-            # suggestions = self.get_best_suggestions()
-            suggestions = ()
             self.find_possible_continues(do, undo, suggestions)
 
-    def get_best_suggestions(self):
-            suggestion_list = []
-            split_words = PAT.findall(self.words)
-            for phrase in SuggestionsDisplayDialog.tails(split_words):
-                phrase = u' '.join(phrase)
-                suggestion_list.extend(self.steno_engine.get_suggestions(phrase))
-
-            if not suggestion_list and split_words:
-                suggestion_list = [Suggestion(split_words[-1], [])]
-
-            return suggestion_list
+        if add_to_history:
+            self._state.translations.extend(do)
 
     def _find_translation(self, stroke, mapping):
         t = self._find_translation_helper(stroke)
@@ -419,12 +413,10 @@ class Translator(object):
             if(len(self._state.translations) > 0):
                 # search for possible continues based on previous outline
                 before = [self._state.translations[len(self._state.translations) - 1]]
-                possible_continues = self.getPossibleContinues(before)
+                possible_continues = self.getPossibleContinues(before, suggestions)
         else:
             # search for possible continues based on current outline
-            possible_continues = self.getPossibleContinues(do)
-        # append suggestions to possible contiues
-        # TODO...
+            possible_continues = self.getPossibleContinues(do, suggestions)
 
         # if there is possible continues and current or previous
         # (depends in the case) outline is not '*', than get ime_connection to send it
@@ -432,14 +424,71 @@ class Translator(object):
            (len(do) < 1 and not undo[0].rtfcre == ('*',))):
             self.ime_connection.setPossContAndSuggs(possible_continues)
 
+    def get_best_suggestions(self, do, undo, prev):
+        prev_formatting = prev.formatting if prev else None
+
+        for t in do:
+            last_action = self._get_last_action(prev.formatting if prev else None)
+            if t.english:
+                t.formatting = formatting._translation_to_actions(t.english, last_action,
+                                                       self.spaces_after)
+            else:
+                t.formatting = formatting._raw_to_actions(t.rtfcre[0], last_action,
+                                               self.spaces_after)
+            prev = t
+
+        old = [a for t in undo for a in t.formatting]
+        new = [a for t in do for a in t.formatting]
+
+        for action in old:
+            remove = len(action.text)
+            self.words = self.words[:-remove]
+            self.words = self.words + action.replace
+
+        for action in new:
+            remove = len(action.replace)
+            if remove > 0:
+                self.words = self.words[:-remove]
+            self.words = self.words + action.text
+
+        # Limit phrasing memory to 100 characters, because most phrases probably
+        # don't exceed this length
+        self.words = self.words[-100:]
+
+        suggestion_list = []
+        split_words = PAT.findall(self.words)
+        for phrase in self.tails(split_words):
+            phrase = u' '.join(phrase)
+            suggestion_list.extend(self.steno_engine.get_suggestions(phrase))
+
+        if not suggestion_list and split_words:
+            suggestion_list = [Suggestion(split_words[-1], [])]
+
+        return suggestion_list
+
+    def tails(self, ls):
+        for i in range(len(ls)):
+            yield ls[i:]
+
+    def set_space_placement(self, s):
+        # Set whether spaces will be inserted
+        # before the output or after the output
+        self.spaces_after = bool(s == 'After Output')
+
+    def _get_last_action(self, actions):
+        """Return last action in actions if possible or return a default action."""
+        if actions:
+            return actions[-1]
+        return formatting._Action(attach=self.start_attached, capitalize=self.start_capitalized)
+
     def create_common_words_dict(self, fname):
         self._dictionary.create_common_words_dict(fname)
 
     def add_ime_connection(self, con):
         self.ime_connection = con
 
-    def getPossibleContinues(self, do):
-        return self._dictionary.findPossibleContinues(do)
+    def getPossibleContinues(self, do, suggestions):
+        return self._dictionary.findPossibleContinues(do, suggestions)
 
 
 class _State(object):

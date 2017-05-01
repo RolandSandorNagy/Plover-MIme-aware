@@ -193,11 +193,12 @@ class StenoDictionaryCollection(object):
             for c in self.longest_key_callbacks:
                 c(new_longest_key)
 
-    def findPossibleContinues(self, do, filters=()):
+    def findPossibleContinues(self, do, suggestions, filters=()):
         key = do[0].rtfcre
         key_len = len(key)
         possibilities = {}
-        currentKey = "current"
+        currentKey = ("ime--current",)
+        # currentKey = "current"
         curr_key = u""
         for i in range(0, len(key)):
             if(not i == 0 and not i == len(key)):
@@ -218,7 +219,42 @@ class StenoDictionaryCollection(object):
 
         possibilities = self.shrinkPossibilities(possibilities)
         possibilities[(currentKey,)] = curr_key + u":" + tr + u":"
+        return self.attachSuggestionsTo(possibilities, suggestions)
+
+    def attachSuggestionsTo(self, possibilities, suggestions):
+        all_suggs_str = u""
+        for i in range(0, len(suggestions)):
+            s = suggestions[i]
+            steno_list = s.steno_list
+            best = self.get_best_sugg(steno_list)
+            best_str = u''
+            for i in range(0, len(best)):
+                if(not i == 0): 
+                    best_str += u'/'
+                best_str += best[i]
+            all_suggs_str += best_str + u":" + s.text + u":"
+
+        currentKey = ("ime--alt",)
+        possibilities[(currentKey,)] = all_suggs_str
         return possibilities
+
+    def get_best_sugg(self, steno_list):
+        t = ()
+        min_w = 0
+        found = False
+        for i in range(0, len(steno_list)):
+            w = self.calc_weight(steno_list[i])
+            if(not found or (found and min_w > w)):
+                min_w = w
+                t = steno_list[i]
+                found = True
+        return t
+
+    def calc_weight(self, tulpe):
+        x = 0
+        for i in range(0, len(tulpe)):
+            x += len(tulpe[i]) + 1
+        return x - 1
 
     def create_common_words_dict(self, fname):
         self.common_words_dict = {}

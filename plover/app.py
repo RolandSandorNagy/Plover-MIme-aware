@@ -252,10 +252,13 @@ class StenoEngine(object):
     def set_space_placement(self, s):
         """Set whether spaces will be inserted before the output or after the output."""
         self.formatter.set_space_placement(s)
+        self.translator.set_space_placement(s)
 
     def set_starting_stroke_state(self, capitalize=False, attach=False):
         self.formatter.start_attached = attach
         self.formatter.start_capitalized = capitalize
+        self.translator.start_attached = attach
+        self.translator.start_capitalized = capitalize
 
     def set_undo_levels(self, levels):
         """Set the maximum number of changes that can be undone."""
