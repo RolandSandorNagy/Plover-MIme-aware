@@ -785,25 +785,6 @@ class ImeConfig(wx.Panel):
 
         self.number_of_suggestions = number_of_suggestions_buffer
 
-
-        '''
-        choice_grid = wx.FlexGridSizer(2, 3)
-        choice_grid.AddGrowableCol(1)
-
-        sizer_flags = wx.SizerFlags(1) \
-            .Align(wx.ALIGN_CENTER_VERTICAL) \
-            .Border(wx.ALL, UI_BORDER)
-
-        choice_grid.AddF(
-            wx.StaticText(self, label=SUGGEST_BY_LABEL),
-            sizer_flags.Left())
-        self.choice = wx.Choice(self, choices=["random","alphabetical (asc)","alphabetical (desc)"])
-        self.choice.SetStringSelection(self.mapSuggestBy_its(self.config.get_ime_suggest_by()))
-        choice_grid.AddF(self.choice, sizer_flags.Expand())
-        self.Bind(wx.EVT_CHOICE, self._update, self.choice)
-        '''
-
-
         csv_loc_sizer = wx.BoxSizer(wx.VERTICAL)
 
         ime_csv_file = config.get_ime_words_csv_file()
@@ -868,18 +849,11 @@ class ImeConfig(wx.Panel):
 
         border = wx.BoxSizer(wx.VERTICAL)
         border.AddF(top_grid, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
-        # border.AddF(choice_grid, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
         border.AddF(csv_loc_sizer, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
         border.AddF(exe_loc_sizer, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
         border.AddF(bottom_grid, wx.SizerFlags().Border(wx.ALL, UI_BORDER))
 
         self.SetSizer(border)
-
-    def _update(self, event=None):
-        # Refreshes the UI to reflect current data.
-        # TODO
-        print "update"
-
 
     def save(self):
         """Write all parameters to the config."""
@@ -889,33 +863,9 @@ class ImeConfig(wx.Panel):
             self.popup_timeout.GetValue())
         self.config.set_ime_number_of_suggestions(
             self.number_of_suggestions.GetValue())
-        '''
-        self.config.set_ime_suggest_by(
-            self.mapSuggestBy_sti(
-                self.choice.GetStringSelection()))
-        '''
         self.config.set_ime_words_csv_file(
             self.csv_file_browser.GetValue())
         self.config.set_ime_exe_file(
             self.exe_file_browser.GetValue())
         self.config.set_ime_host(self.host.GetValue())
         self.config.set_ime_port(self.port.GetValue())
-        self._update()
-
-    '''
-    def mapSuggestBy_sti(self, str):
-        if(str == "random"):
-            return 1
-        elif(str == "alphabetical (asc)"):
-            return 2
-        elif(str == "alphabetical (desc)"):
-            return 3
-
-    def mapSuggestBy_its(self, i):
-        if(i == 1):
-            return "random"
-        elif(i == 2):
-            return "alphabetical (asc)"
-        elif(i == 3):
-            return "alphabetical (desc)"
-    '''

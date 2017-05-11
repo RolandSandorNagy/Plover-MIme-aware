@@ -74,7 +74,7 @@ class ImeConnection(threading.Thread):
             return False
 
     def setMsg(self, msg):
-        if(not self.connected or (not self.isActive and msg != self.frame.IME_CMD_RESUME)):
+        if(not self.connected or (not self.isActive and msg != self.frame.IME_CMD_RESUME and msg != self.frame.IME_CMD_STOP)):
             return
         self.message = msg
         self.hasMessage = True
